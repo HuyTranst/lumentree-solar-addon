@@ -1,0 +1,229 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.lumentree_solar",
+  "data": {
+    "config": {
+      "title": "Lumentree Solar Real-Time",
+      "views": [
+        {
+          "title": "Real-Time Dashboard",
+          "path": "solar-live",
+          "panel": true,
+          "icon": "mdi:solar-power-variant",
+          "cards": [
+            {
+              "type": "iframe",
+              "url": "/local/lumentree/solar_live.html?v=4.0",
+              "aspect_ratio": "100%"
+            }
+          ]
+        },
+        {
+          "title": "Giám Sát Biến Tần & Tự Động Máy Lạnh",
+          "path": "inverter-health",
+          "icon": "mdi:shield-home",
+          "cards": [
+            {
+              "type": "markdown",
+              "content": "## ☀️ PHẦN 1: GIÁM SÁT & BÁO LỖI BIẾN TẦN LUMENTREE (06H - 17H)\n**Tự động phát hiện Pin Mặt Trời = 0W trong 10 phút và gửi tin nhắn cảnh báo khẩn cấp về điện thoại.**"
+            },
+            {
+              "type": "glance",
+              "title": "📊 Thông Số Điện Trực Tiếp Real-Time (Pin Mặt Trời & Lưới EVN)",
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "columns": 3,
+              "entities": [
+                {
+                  "entity": "sensor.lumentree_pv1_power",
+                  "name": "Công Suất PV1",
+                  "icon": "mdi:solar-power"
+                },
+                {
+                  "entity": "sensor.lumentree_pv1_voltage",
+                  "name": "Điện Áp PV1",
+                  "icon": "mdi:flash"
+                },
+                {
+                  "entity": "sensor.lumentree_pv1_current",
+                  "name": "Dòng Điện PV1",
+                  "icon": "mdi:current-ac"
+                },
+                {
+                  "entity": "sensor.lumentree_grid_power",
+                  "name": "Công Suất EVN",
+                  "icon": "mdi:transmission-tower"
+                },
+                {
+                  "entity": "sensor.lumentree_home_load",
+                  "name": "Tổng Tải Nhà",
+                  "icon": "mdi:home-lightning"
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "🔍 Chi Tiết Đo Đạc Thực Tế Từ Biến Tần Lumentree",
+              "state_color": true,
+              "entities": [
+                {
+                  "entity": "sensor.lumentree_pv1_power",
+                  "name": "☀️ Công Suất Pin Mặt Trời (PV1 Power)",
+                  "icon": "mdi:solar-power"
+                },
+                {
+                  "entity": "sensor.lumentree_pv1_voltage",
+                  "name": "⚡ Điện Áp Pin Mặt Trời (PV1 Voltage)",
+                  "icon": "mdi:flash"
+                },
+                {
+                  "entity": "sensor.lumentree_pv1_current",
+                  "name": "🔌 Dòng Điện Pin Mặt Trời (PV1 Current)",
+                  "icon": "mdi:current-ac"
+                },
+                {
+                  "entity": "sensor.lumentree_grid_power",
+                  "name": "🏗️ Công Suất Lưới EVN (Grid Power)",
+                  "icon": "mdi:transmission-tower"
+                },
+                {
+                  "entity": "sensor.lumentree_home_load",
+                  "name": "🏠 Tổng Tải Tiêu Thụ Nhà (Home Load)",
+                  "icon": "mdi:home-lightning"
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "📡 Trạng Thái Biến Tần Lumentree",
+              "state_color": true,
+              "entities": [
+                {
+                  "entity": "sensor.trang_thai_bien_tan_lumentree",
+                  "name": "Trạng thái hệ thống"
+                },
+                {
+                  "entity": "input_boolean.solar_health_fault_status",
+                  "name": "Cảnh báo sự cố (Alert)"
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "⚙️ Cài Đặt Kiểm Tra Biến Tần (6h - 17h & 10p)",
+              "show_header_toggle": false,
+              "entities": [
+                {
+                  "entity": "input_boolean.solar_health_monitor_enabled",
+                  "name": "Bật/Tắt Giám Sát Biến Tần"
+                },
+                {
+                  "entity": "input_datetime.solar_health_start_time",
+                  "name": "Giờ bắt đầu"
+                },
+                {
+                  "entity": "input_datetime.solar_health_end_time",
+                  "name": "Giờ kết thúc"
+                },
+                {
+                  "entity": "input_number.solar_health_check_interval",
+                  "name": "Thời gian kiểm tra (Phút)"
+                },
+                {
+                  "entity": "input_number.solar_health_power_threshold",
+                  "name": "Ngưỡng công suất lỗi (W)"
+                },
+                {
+                  "entity": "input_button.solar_health_test_notify",
+                  "name": "Bấm để Test gửi tin nhắn về điện thoại",
+                  "icon": "mdi:bell-ring"
+                }
+              ]
+            },
+            {
+              "type": "markdown",
+              "content": "## ❄️ PHẦN 2: KIỂM TRA CÔNG SUẤT TIÊU THỤ & ĐIỀU KHIỂN MÁY LẠNH (08H - 16H)\n**Tự động kiểm tra Điện áp PV1 và Lưới EVN để phát thông báo và gửi lệnh Hồng Ngoại Tắt / Mở Máy Lạnh.**"
+            },
+            {
+              "type": "entities",
+              "title": "📡 Trạng Thái Vận Hành Máy Lạnh Real-Time",
+              "state_color": true,
+              "entities": [
+                {
+                  "entity": "sensor.trang_thai_may_lanh_solar",
+                  "name": "Trạng thái Máy Lạnh Solar"
+                },
+                {
+                  "entity": "input_select.solar_ac_auto_current_state",
+                  "name": "Chế độ hiện tại"
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "⚙️ Cài Đặt Thông Số Kiểm Tra Máy Lạnh (8h - 16h)",
+              "show_header_toggle": false,
+              "entities": [
+                {
+                  "entity": "input_boolean.solar_ac_auto_notify_enabled",
+                  "name": "Bật/Tắt Thông báo về Điện thoại"
+                },
+                {
+                  "entity": "input_boolean.solar_ac_auto_control_enabled",
+                  "name": "Bật/Tắt Tự động lệnh Hồng Ngoại"
+                },
+                {
+                  "entity": "input_datetime.solar_ac_auto_start_time",
+                  "name": "Giờ bắt đầu kiểm tra"
+                },
+                {
+                  "entity": "input_datetime.solar_ac_auto_end_time",
+                  "name": "Giờ kết thúc kiểm tra"
+                },
+                {
+                  "entity": "input_number.solar_ac_check_duration",
+                  "name": "Thời gian chờ báo lỗi máy lạnh (Phút)"
+                },
+                {
+                  "entity": "input_number.solar_ac_pv_low_voltage",
+                  "name": "Ngưỡng áp PV1 thấp (V)"
+                },
+                {
+                  "entity": "input_number.solar_ac_grid_high_power",
+                  "name": "Ngưỡng Lưới EVN cao (W)"
+                },
+                {
+                  "entity": "input_number.solar_ac_pv_high_voltage",
+                  "name": "Ngưỡng áp PV1 đạt (V)"
+                },
+                {
+                  "entity": "input_number.solar_ac_grid_low_power",
+                  "name": "Ngưỡng Lưới EVN đạt (W)"
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "🕹️ Nút Bấm Thử Nghiệm Lệnh Hồng Ngoại Máy Lạnh",
+              "show_header_toggle": false,
+              "entities": [
+                {
+                  "entity": "script.lumentree_turn_off_ac_ir",
+                  "name": "Thử nghiệm Lệnh Hồng Ngoại: TẮT Máy Lạnh",
+                  "icon": "mdi:power-plug-off"
+                },
+                {
+                  "entity": "script.lumentree_turn_on_ac_ir",
+                  "name": "Thử nghiệm Lệnh Hồng Ngoại: MỞ Máy Lạnh",
+                  "icon": "mdi:power-plug"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

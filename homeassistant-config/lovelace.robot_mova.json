@@ -1,0 +1,354 @@
+{
+  "version": 1,
+  "minor_version": 1,
+  "key": "lovelace.robot_mova",
+  "data": {
+    "config": {
+      "title": "Robot Mova L40 Ultra",
+      "views": [
+        {
+          "title": "\u0110i\u1ec1u Khi\u1ec3n & B\u1ea3n \u0110\u1ed3",
+          "path": "main",
+          "icon": "mdi:robot-vacuum",
+          "type": "sidebar",
+          "cards": [
+            {
+              "type": "custom:mova-anim-card"
+            },
+            {
+              "type": "custom:valetudo-map-card",
+              "vacuum": "valetudo_l40_ultra_oilyinstructivebeaver",
+              "title": "B\u1ea3n \u0110\u1ed3 Di Chuy\u1ec3n Tr\u1ef1c Tuy\u1ebfn (Th\u1eddi Gian Th\u1ef1c)",
+              "show_dock": true,
+              "show_path": true,
+              "show_charger": true,
+              "show_robot": true,
+              "rotate": 90,
+              "map_scale": 0.85
+            },
+            {
+              "type": "glance",
+              "title": "Th\u00f4ng Tin Nhanh",
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "columns": 3,
+              "entities": [
+                {
+                  "entity": "sensor.valetudo_l40_ultra_oilyinstructivebeaver_battery_level",
+                  "name": "M\u1ee9c Pin",
+                  "icon": "mdi:battery-charging"
+                },
+                {
+                  "entity": "sensor.valetudo_l40_ultra_oilyinstructivebeaver_dock_status",
+                  "name": "Tr\u1ea1ng Th\u00e1i Tr\u1ea1m",
+                  "icon": "mdi:dock-bottom"
+                },
+                {
+                  "entity": "sensor.valetudo_l40_ultra_oilyinstructivebeaver_wi_fi_configuration",
+                  "name": "S\u00f3ng Wi-Fi",
+                  "icon": "mdi:wifi"
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "title": "B\u1ed9 \u0110i\u1ec1u Khi\u1ec3n Ch\u00ednh",
+              "columns": 4,
+              "square": false,
+              "cards": [
+                {
+                  "type": "button",
+                  "name": "B\u1eaft \u0110\u1ea7u Lau",
+                  "icon": "mdi:play-circle",
+                  "icon_height": "38px",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.robot_start_cleaning"
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "T\u1ea1m D\u1eebng",
+                  "icon": "mdi:pause-circle",
+                  "icon_height": "38px",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.robot_pause_cleaning"
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "D\u1eebng H\u1eb3n",
+                  "icon": "mdi:stop-circle",
+                  "icon_height": "38px",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.robot_stop_cleaning"
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "V\u1ec1 Tr\u1ea1m S\u1ea1c",
+                  "icon": "mdi:home-import-outline",
+                  "icon_height": "38px",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.robot_return_dock"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "grid",
+              "title": "B\u1ea3o Tr\u00ec & V\u1ec7 Sinh Gi\u1ebb Lau",
+              "columns": 3,
+              "square": false,
+              "cards": [
+                {
+                  "type": "button",
+                  "name": "Gi\u1eb7t Gi\u1ebb Lau",
+                  "icon": "mdi:water-sync",
+                  "icon_height": "30px",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.robot_clean_mop"
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "S\u1ea5y Kh\u00f4 Gi\u1ebb",
+                  "icon": "mdi:wind-power",
+                  "icon_height": "30px",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.robot_dry_mop"
+                  }
+                },
+                {
+                  "type": "button",
+                  "name": "T\u00ecm Robot",
+                  "icon": "mdi:volume-high",
+                  "icon_height": "30px",
+                  "tap_action": {
+                    "action": "call-service",
+                    "service": "script.robot_locate"
+                  }
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "Ch\u1ebf \u0110\u1ed9 L\u00e0m Vi\u1ec7c & L\u1ef1c H\u00fat / N\u01b0\u1edbc (Ti\u1ebfng Vi\u1ec7t)",
+              "entities": [
+                {
+                  "entity": "select.robot_mova_che_do_lam_viec",
+                  "name": "Ch\u1ebf \u0110\u1ed9 L\u00e0m Vi\u1ec7c",
+                  "icon": "mdi:cog-sync"
+                },
+                {
+                  "entity": "select.robot_mova_luc_hut_bui",
+                  "name": "L\u1ef1c H\u00fat Qu\u1ea1t",
+                  "icon": "mdi:fan"
+                },
+                {
+                  "entity": "select.robot_mova_luong_nuoc_lau",
+                  "name": "L\u01b0\u1ee3ng N\u01b0\u1edbc Lau S\u00e0n",
+                  "icon": "mdi:water-percent"
+                },
+                {
+                  "entity": "sensor.robot_mova_tam_gan_gie_lau",
+                  "name": "T\u1ea5m G\u1eafn Gi\u1ebb Lau Nh\u00e0",
+                  "icon": "mdi:wiper-wash"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "H\u1eb9n Gi\u1edd D\u1ecdn D\u1eb9p",
+          "path": "schedule",
+          "icon": "mdi:calendar-clock",
+          "cards": [
+            {
+              "type": "entities",
+              "title": "\u23f0 L\u1ecbch H\u1eb9n 1 (V\u00ed d\u1ee5: S\u00e1ng - Lau Ph\u00f2ng Kh\u00e1ch & Nh\u00e0 B\u1ebfp)",
+              "show_header_toggle": false,
+              "entities": [
+                {
+                  "entity": "input_boolean.robot_schedule_1_enabled",
+                  "name": "B\u1eadt L\u1ecbch H\u1eb9n 1",
+                  "icon": "mdi:alarm-check"
+                },
+                {
+                  "entity": "input_datetime.robot_schedule_1_time",
+                  "name": "Gi\u1edd B\u1eaft \u0110\u1ea7u Ch\u1ea1y",
+                  "icon": "mdi:clock-time-four-outline"
+                },
+                {
+                  "entity": "input_boolean.schedule_1_room_living",
+                  "name": "Lau Ph\u00f2ng Kh\u00e1ch",
+                  "icon": "mdi:sofa"
+                },
+                {
+                  "entity": "input_boolean.schedule_1_room_kitchen",
+                  "name": "Lau Nh\u00e0 B\u1ebfp",
+                  "icon": "mdi:countertop"
+                },
+                {
+                  "entity": "input_boolean.schedule_1_room_hallway",
+                  "name": "Lau H\u00e0nh Lang",
+                  "icon": "mdi:transit-connection-variant"
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "name": "\u25b6\ufe0f Ch\u1ea1y Th\u1eed Ngay L\u1ecbch 1",
+              "icon": "mdi:play",
+              "tap_action": {
+                "action": "call-service",
+                "service": "script.run_schedule_1"
+              }
+            },
+            {
+              "type": "entities",
+              "title": "\u23f0 L\u1ecbch H\u1eb9n 2 (V\u00ed d\u1ee5: Chi\u1ec1u - Lau H\u00e0nh Lang)",
+              "show_header_toggle": false,
+              "entities": [
+                {
+                  "entity": "input_boolean.robot_schedule_2_enabled",
+                  "name": "B\u1eadt L\u1ecbch H\u1eb9n 2",
+                  "icon": "mdi:alarm-check"
+                },
+                {
+                  "entity": "input_datetime.robot_schedule_2_time",
+                  "name": "Gi\u1edd B\u1eaft \u0110\u1ea7u Ch\u1ea1y",
+                  "icon": "mdi:clock-time-four-outline"
+                },
+                {
+                  "entity": "input_boolean.schedule_2_room_living",
+                  "name": "Lau Ph\u00f2ng Kh\u00e1ch",
+                  "icon": "mdi:sofa"
+                },
+                {
+                  "entity": "input_boolean.schedule_2_room_kitchen",
+                  "name": "Lau Nh\u00e0 B\u1ebfp",
+                  "icon": "mdi:countertop"
+                },
+                {
+                  "entity": "input_boolean.schedule_1_room_hallway",
+                  "name": "Lau H\u00e0nh Lang",
+                  "icon": "mdi:transit-connection-variant"
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "name": "\u25b6\ufe0f Ch\u1ea1y Th\u1eed Ngay L\u1ecbch 2",
+              "icon": "mdi:play",
+              "tap_action": {
+                "action": "call-service",
+                "service": "script.run_schedule_2"
+              }
+            },
+            {
+              "type": "entities",
+              "title": "\u23f0 L\u1ecbch H\u1eb9n 3 (T\u00f9y Ch\u1ec9nh Th\u00eam)",
+              "show_header_toggle": false,
+              "entities": [
+                {
+                  "entity": "input_boolean.robot_schedule_3_enabled",
+                  "name": "B\u1eadt L\u1ecbch H\u1eb9n 3",
+                  "icon": "mdi:alarm-check"
+                },
+                {
+                  "entity": "input_datetime.robot_schedule_3_time",
+                  "name": "Gi\u1edd B\u1eaft \u0110\u1ea7u Ch\u1ea1y",
+                  "icon": "mdi:clock-time-four-outline"
+                },
+                {
+                  "entity": "input_boolean.schedule_3_room_living",
+                  "name": "Lau Ph\u00f2ng Kh\u00e1ch",
+                  "icon": "mdi:sofa"
+                },
+                {
+                  "entity": "input_boolean.schedule_3_room_kitchen",
+                  "name": "Lau Nh\u00e0 B\u1ebfp",
+                  "icon": "mdi:countertop"
+                },
+                {
+                  "entity": "input_boolean.schedule_3_room_hallway",
+                  "name": "Lau H\u00e0nh Lang",
+                  "icon": "mdi:transit-connection-variant"
+                }
+              ]
+            },
+            {
+              "type": "button",
+              "name": "\u25b6\ufe0f Ch\u1ea1y Th\u1eed Ngay L\u1ecbch 3",
+              "icon": "mdi:play",
+              "tap_action": {
+                "action": "call-service",
+                "service": "script.run_schedule_3"
+              }
+            }
+          ]
+        },
+        {
+          "title": "Th\u1ed1ng K\u00ea & B\u1ea3o Tr\u00ec",
+          "path": "stats",
+          "icon": "mdi:chart-box-outline",
+          "cards": [
+            {
+              "type": "glance",
+              "title": "T\u1ed5ng Quan Ho\u1ea1t \u0110\u1ed9ng & B\u1ea3o Tr\u00ec",
+              "show_name": true,
+              "show_icon": true,
+              "show_state": true,
+              "columns": 3,
+              "entities": [
+                {
+                  "entity": "sensor.valetudo_l40_ultra_oilyinstructivebeaver_battery_level",
+                  "name": "M\u1ee9c Pin",
+                  "icon": "mdi:battery"
+                },
+                {
+                  "entity": "sensor.valetudo_l40_ultra_oilyinstructivebeaver_dock_status",
+                  "name": "Tr\u1ea1ng Th\u00e1i Dock",
+                  "icon": "mdi:dock-bottom"
+                },
+                {
+                  "entity": "sensor.valetudo_l40_ultra_oilyinstructivebeaver_wi_fi_configuration",
+                  "name": "S\u00f3ng Wi-Fi",
+                  "icon": "mdi:wifi"
+                }
+              ]
+            },
+            {
+              "type": "entities",
+              "title": "Ch\u1ea9n \u0110o\u00e1n Tr\u1ea1ng Th\u00e1i H\u1ec7 Th\u1ed1ng",
+              "entities": [
+                {
+                  "entity": "sensor.valetudo_l40_ultra_oilyinstructivebeaver_error",
+                  "name": "T\u00ecnh Tr\u1ea1ng L\u1ed7i Robot",
+                  "icon": "mdi:shield-check"
+                },
+                {
+                  "entity": "sensor.robot_mova_trang_thai_tieng_viet",
+                  "name": "Tr\u1ea1ng Th\u00e1i L\u00e0m Vi\u1ec7c Hi\u1ec7n T\u1ea1i",
+                  "icon": "mdi:robot-vacuum"
+                },
+                {
+                  "entity": "sensor.robot_mova_tam_gan_gie_lau",
+                  "name": "C\u1ea3m Bi\u1ebfn G\u1eafn Gi\u1ebb Lau",
+                  "icon": "mdi:wiper-wash"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

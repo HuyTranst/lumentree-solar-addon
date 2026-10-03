@@ -1,0 +1,301 @@
+# ==============================================================================
+# BỘ KỊCH BẢN ĐIỀU KHIỂN ROBOT MOVA L40 ULTRA (VALETUDO) - CHUẨN 3 PHÒNG CHÍNH
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# 1. CÁC NÚT ĐIỀU KHIỂN CƠ BẢN
+# ------------------------------------------------------------------------------
+robot_start_cleaning:
+  alias: "▶️ Bắt đầu dọn dẹp toàn bộ nhà"
+  sequence:
+    - service: rest_command.valetudo_basic_control
+      data:
+        action: "start"
+  mode: single
+  icon: mdi:play-circle
+
+robot_pause_cleaning:
+  alias: "⏸️ Tạm dừng dọn dẹp"
+  sequence:
+    - service: rest_command.valetudo_basic_control
+      data:
+        action: "pause"
+  mode: single
+  icon: mdi:pause-circle
+
+robot_stop_cleaning:
+  alias: "⏹️ Dừng hẳn dọn dẹp"
+  sequence:
+    - service: rest_command.valetudo_basic_control
+      data:
+        action: "stop"
+  mode: single
+  icon: mdi:stop-circle
+
+robot_return_dock:
+  alias: "🏠 Quay về Dock sạc"
+  sequence:
+    - service: rest_command.valetudo_basic_control
+      data:
+        action: "home"
+  mode: single
+  icon: mdi:home-import-outline
+
+robot_locate:
+  alias: "🔊 Tìm Robot (Phát âm thanh)"
+  sequence:
+    - service: rest_command.valetudo_locate
+  mode: single
+  icon: mdi:volume-high
+
+robot_empty_dustbin:
+  alias: "🗑️ Hút rác lên Dock"
+  sequence:
+    - service: rest_command.valetudo_empty_dock
+  mode: single
+  icon: mdi:delete-empty
+
+robot_clean_mop:
+  alias: "🧼 Giặt giẻ lau tại Dock"
+  sequence:
+    - service: rest_command.valetudo_clean_mop
+  mode: single
+  icon: mdi:water-sync
+
+robot_dry_mop:
+  alias: "💨 Sấy khô giẻ lau tại Dock"
+  sequence:
+    - service: rest_command.valetudo_dry_mop
+  mode: single
+  icon: mdi:wind-power
+
+# ------------------------------------------------------------------------------
+# 2. DỌN TỪNG PHÒNG RIÊNG LẺ (1-CHẠM)
+# ------------------------------------------------------------------------------
+clean_phong_khach:
+  alias: "🛋️ Lau Phòng Khách"
+  sequence:
+    - service: rest_command.valetudo_clean_segment
+      data:
+        segment_ids: ["2"]
+        iterations: 1
+  mode: single
+  icon: mdi:sofa
+
+clean_bep:
+  alias: "🍳 Lau Nhà Bếp"
+  sequence:
+    - service: rest_command.valetudo_clean_segment
+      data:
+        segment_ids: ["6"]
+        iterations: 1
+  mode: single
+  icon: mdi:countertop
+
+clean_hanh_lang:
+  alias: "🚪 Lau Hành Lang"
+  sequence:
+    - service: rest_command.valetudo_clean_segment
+      data:
+        segment_ids: ["4"]
+        iterations: 1
+  mode: single
+  icon: mdi:transit-connection-variant
+
+# ------------------------------------------------------------------------------
+# 3. DỌN NHIỀU PHÒNG TÙY CHỌN TRỰC TIẾP TRÊN DASHBOARD
+# ------------------------------------------------------------------------------
+clean_selected_rooms_now:
+  alias: "🚀 Bắt đầu lau các phòng đã chọn"
+  sequence:
+    - variables:
+        target_segments: >
+          {% set segs = [] %}
+          {% if is_state('input_boolean.manual_room_living', 'on') %}
+            {% set segs = segs + ["2"] %}
+          {% endif %}
+          {% if is_state('input_boolean.manual_room_kitchen', 'on') %}
+            {% set segs = segs + ["6"] %}
+          {% endif %}
+          {% if is_state('input_boolean.manual_room_hallway', 'on') %}
+            {% set segs = segs + ["4"] %}
+          {% endif %}
+          {{ segs }}
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length > 0 }}"
+          sequence:
+            - service: rest_command.valetudo_clean_segment
+              data:
+                segment_ids: "{{ target_segments }}"
+                iterations: 1
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length == 0 }}"
+          sequence:
+            - service: rest_command.valetudo_basic_control
+              data:
+                action: "start"
+  mode: restart
+  icon: mdi:play-speed
+
+# ------------------------------------------------------------------------------
+# 4. CHẠY LỊCH HẸN TỰ ĐỘNG
+# ------------------------------------------------------------------------------
+run_schedule_1:
+  alias: "⏰ Kích hoạt Lịch Hẹn 1"
+  sequence:
+    - variables:
+        target_segments: >
+          {% set segs = [] %}
+          {% if is_state('input_boolean.schedule_1_room_living', 'on') %}
+            {% set segs = segs + ["2"] %}
+          {% endif %}
+          {% if is_state('input_boolean.schedule_1_room_kitchen', 'on') %}
+            {% set segs = segs + ["6"] %}
+          {% endif %}
+          {% if is_state('input_boolean.schedule_1_room_hallway', 'on') %}
+            {% set segs = segs + ["4"] %}
+          {% endif %}
+          {{ segs }}
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length > 0 }}"
+          sequence:
+            - service: rest_command.valetudo_clean_segment
+              data:
+                segment_ids: "{{ target_segments }}"
+                iterations: 1
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length == 0 }}"
+          sequence:
+            - service: rest_command.valetudo_basic_control
+              data:
+                action: "start"
+  mode: single
+  icon: mdi:calendar-clock
+
+run_schedule_2:
+  alias: "⏰ Kích hoạt Lịch Hẹn 2"
+  sequence:
+    - variables:
+        target_segments: >
+          {% set segs = [] %}
+          {% if is_state('input_boolean.schedule_2_room_living', 'on') %}
+            {% set segs = segs + ["2"] %}
+          {% endif %}
+          {% if is_state('input_boolean.schedule_2_room_kitchen', 'on') %}
+            {% set segs = segs + ["6"] %}
+          {% endif %}
+          {% if is_state('input_boolean.schedule_2_room_hallway', 'on') %}
+            {% set segs = segs + ["4"] %}
+          {% endif %}
+          {{ segs }}
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length > 0 }}"
+          sequence:
+            - service: rest_command.valetudo_clean_segment
+              data:
+                segment_ids: "{{ target_segments }}"
+                iterations: 1
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length == 0 }}"
+          sequence:
+            - service: rest_command.valetudo_basic_control
+              data:
+                action: "start"
+  mode: single
+  icon: mdi:calendar-clock
+
+run_schedule_3:
+  alias: "⏰ Kích hoạt Lịch Hẹn 3"
+  sequence:
+    - variables:
+        target_segments: >
+          {% set segs = [] %}
+          {% if is_state('input_boolean.schedule_3_room_living', 'on') %}
+            {% set segs = segs + ["2"] %}
+          {% endif %}
+          {% if is_state('input_boolean.schedule_3_room_kitchen', 'on') %}
+            {% set segs = segs + ["6"] %}
+          {% endif %}
+          {% if is_state('input_boolean.schedule_3_room_hallway', 'on') %}
+            {% set segs = segs + ["4"] %}
+          {% endif %}
+          {{ segs }}
+    - choose:
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length > 0 }}"
+          sequence:
+            - service: rest_command.valetudo_clean_segment
+              data:
+                segment_ids: "{{ target_segments }}"
+                iterations: 1
+        - conditions:
+            - condition: template
+              value_template: "{{ target_segments | length == 0 }}"
+          sequence:
+            - service: rest_command.valetudo_basic_control
+              data:
+                action: "start"
+  mode: single
+  icon: mdi:calendar-clock
+
+
+# ==============================================================================
+# PHẦN 2: KỊCH BẢN NÚT NHẤN HỒNG NGOẠI TẮT / MỞ MÁY LẠNH (ĐỂ TRỐNG ĐỂ THÊM THIẾT BỊ SẠU)
+# ==============================================================================
+# ==============================================================================
+# PHẦN 2: KỊCH BẢN NÚT NHẤN HỒNG NGOẠI TẮT / MỞ MÁY LẠNH (GỬI THÔNG BÁO VỀ ĐT)
+# ==============================================================================
+# ==============================================================================
+# KỊCH BẢN NÚT NHẤN HỒNG NGOẠI TẮT / MỞ MÁY LẠNH (GỬI THÔNG BÁO THỬ NGHIỆM ĐT)
+# ==============================================================================
+lumentree_turn_off_ac_ir:
+  alias: "❄️ [Hồng Ngoại] Lệnh TẮT Máy Lạnh"
+  description: "Lệnh gửi qua nút nhấn hồng ngoại TẮT máy lạnh (Có thông báo ĐT)"
+  sequence:
+    - service: notify.notify
+      data:
+        title: "❄️ [Hồng Ngoại] Lệnh TẮT Máy Lạnh"
+        message: "Đã kích hoạt lệnh TẮT máy lạnh qua nút bấm Hồng Ngoại lúc {{ now().strftime('%H:%M:%S') }}."
+        data:
+          push:
+            sound:
+              name: default
+          priority: high
+    - service: persistent_notification.create
+      data:
+        title: "❄️ [Hồng Ngoại] Lệnh TẮT Máy Lạnh"
+        message: "Đã kích hoạt lệnh TẮT máy lạnh qua Hồng Ngoại lúc {{ now().strftime('%H:%M:%S') }}."
+        notification_id: "ac_ir_off_log"
+  mode: single
+  icon: mdi:power-plug-off
+
+lumentree_turn_on_ac_ir:
+  alias: "❄️ [Hồng Ngoại] Lệnh MỞ Máy Lạnh"
+  description: "Lệnh gửi qua nút nhấn hồng ngoại MỞ máy lạnh (Có thông báo ĐT)"
+  sequence:
+    - service: notify.notify
+      data:
+        title: "❄️ [Hồng Ngoại] Lệnh MỞ Máy Lạnh"
+        message: "Đã kích hoạt lệnh MỞ máy lạnh qua nút bấm Hồng Ngoại lúc {{ now().strftime('%H:%M:%S') }}."
+        data:
+          push:
+            sound:
+              name: default
+          priority: high
+    - service: persistent_notification.create
+      data:
+        title: "❄️ [Hồng Ngoại] Lệnh MỞ Máy Lạnh"
+        message: "Đã kích hoạt lệnh MỞ máy lạnh qua Hồng Ngoại lúc {{ now().strftime('%H:%M:%S') }}."
+        notification_id: "ac_ir_on_log"
+  mode: single
+  icon: mdi:power-plug

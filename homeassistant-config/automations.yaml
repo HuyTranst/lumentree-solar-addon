@@ -1,0 +1,486 @@
+- id: "robot_schedule_1_automation"
+  alias: "⏰ Robot Mova: Chạy Lịch hẹn 1"
+  description: "Tự động dọn các phòng đã chọn theo Lịch 1"
+  trigger:
+    - platform: time
+      at: input_datetime.robot_schedule_1_time
+  condition:
+    - condition: state
+      entity_id: input_boolean.robot_schedule_1_enabled
+      state: "on"
+  action:
+    - action: script.run_schedule_1
+
+- id: "robot_schedule_2_automation"
+  alias: "⏰ Robot Mova: Chạy Lịch hẹn 2"
+  description: "Tự động dọn các phòng đã chọn theo Lịch 2"
+  trigger:
+    - platform: time
+      at: input_datetime.robot_schedule_2_time
+  condition:
+    - condition: state
+      entity_id: input_boolean.robot_schedule_2_enabled
+      state: "on"
+  action:
+    - action: script.run_schedule_2
+
+- id: "robot_schedule_3_automation"
+  alias: "⏰ Robot Mova: Chạy Lịch hẹn 3"
+  description: "Tự động dọn các phòng đã chọn theo Lịch 3"
+  trigger:
+    - platform: time
+      at: input_datetime.robot_schedule_3_time
+  condition:
+    - condition: state
+      entity_id: input_boolean.robot_schedule_3_enabled
+      state: "on"
+  action:
+    - action: script.run_schedule_3
+
+- id: "robot_notify_cleaning_started"
+  alias: "🔔 Robot Mova: Thông báo bắt đầu dọn dẹp"
+  description: "Gửi thông báo ngay khi robot rời dock để dọn dẹp"
+  trigger:
+    - platform: state
+      entity_id: sensor.valetudo_l40_ultra_oilyinstructivebeaver_dock_status
+      from:
+        - "docked"
+        - "charging"
+        - "drying"
+        - "idle"
+      to: "none"
+  action:
+    - action: notify.notify
+      data:
+        title: "🟢 Robot Mova Bắt Đầu Dọn Dẹp"
+        message: "Robot đã rời Dock và đang tiến hành dọn dẹp (Chế độ: {{ states('select.valetudo_l40_ultra_oilyinstructivebeaver_mode') }}, Lực hút: {{ states('select.valetudo_l40_ultra_oilyinstructivebeaver_fan') }})"
+
+- id: "robot_notify_cleaning_finished"
+  alias: "🔔 Robot Mova: Thông báo hoàn thành & về Dock"
+  description: "Gửi thông báo khi robot dọn xong về dock"
+  trigger:
+    - platform: state
+      entity_id: sensor.valetudo_l40_ultra_oilyinstructivebeaver_dock_status
+      to:
+        - "docked"
+        - "charging"
+        - "drying"
+  action:
+    - action: notify.notify
+      data:
+        title: "✅ Robot Mova Đã Hoàn Thành"
+        message: "Robot đã về trạm sạc Dock an toàn. Mức pin hiện tại: {{ states('sensor.valetudo_l40_ultra_oilyinstructivebeaver_battery_level') }}%"
+
+- id: "robot_notify_error_alert"
+  alias: "⚠️ Robot Mova: Cảnh báo sự cố khẩn cấp"
+  description: "Gửi cảnh báo khẩn cấp khi robot bị kẹt hoặc báo lỗi"
+  trigger:
+    - platform: state
+      entity_id: sensor.valetudo_l40_ultra_oilyinstructivebeaver_error
+  condition:
+    - condition: template
+      value_template: "{{ trigger.to_state.state != 'No error' and trigger.to_state.state != 'unknown' and trigger.to_state.state != 'unavailable' }}"
+  action:
+    - action: notify.notify
+      data:
+        title: "⚠️ Cảnh Báo Robot Mova Gặp Lỗi!"
+        message: "Robot báo sự cố: {{ trigger.to_state.state }}. Vui lòng kiểm tra robot!"
+
+# ------------------------------------------------------------------------------
+# KỊCH BẢN 1: THÔNG BÁO KHI NHẬN DIỆN THÀNH CÔNG THÀNH VIÊN TRONG GIA ĐÌNH
+# ------------------------------------------------------------------------------
+- id: face_recognition_notify_match
+  alias: "🚪 [Khuôn mặt] Thông báo khi nhận diện đúng người nhà"
+  description: "Tự động nhận diện khi người đến gần camera và gửi thông báo"
+  trigger:
+    - platform: mqtt
+      topic: "frigate/events"
+  condition:
+    - condition: template
+      value_template: >
+        {% set sl = trigger.payload_json.after.sub_label if trigger.payload_json.after is defined else None %}
+        {% set name = sl[0] if (sl is iterable and sl is not string and sl | length > 0) else sl %}
+        {% set last = as_timestamp(state_attr('automation.khuon_mat_thong_bao_khi_nhan_dien_dung_nguoi_nha', 'last_triggered') | default(0)) %}
+        {{ name in ['Huy', 'Dien', 'Me', 'Khang'] and (as_timestamp(now()) - last > 15) }}
+  action:
+    - variables:
+        sub_label_raw: "{{ trigger.payload_json.after.sub_label }}"
+        raw_name: >
+          {% if sub_label_raw is iterable and sub_label_raw is not string and sub_label_raw | length > 0 %}
+            {{ sub_label_raw[0] }}
+          {% else %}
+            {{ sub_label_raw }}
+          {% endif %}
+        person_name: >
+          {% if raw_name == 'Me' %}
+            Mẹ
+          {% else %}
+            {{ raw_name }}
+          {% endif %}
+        time_str: "{{ now().strftime('%H:%M:%S') }}"
+        date_str: "{{ now().strftime('%d/%m/%Y') }}"
+    - service: persistent_notification.create
+      data:
+        title: "✅ Nhận diện khuôn mặt thành công"
+        message: "Chào mừng **{{ person_name }}** về nhà! (Lúc {{ time_str }} - {{ date_str }})"
+        notification_id: "face_match_notify"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.face_test_result
+      data:
+        value: "🎉 TỰ ĐỘNG NHẬN DIỆN: {{ person_name }} lúc {{ time_str }}!"
+    - service: mqtt.publish
+      data:
+        topic: "homeassistant/face/match"
+        payload: "{{ person_name }}"
+        retain: true
+    - service: mqtt.publish
+      data:
+        topic: "homeassistant/face/match_time"
+        payload: "{{ time_str }} - {{ date_str }}"
+        retain: true
+    - service: notify.notify
+      data:
+        title: "🚪 Nhận diện mở cửa"
+        message: "Phát hiện {{ person_name }} vừa đứng trước cửa (Camera Dahua)"
+  mode: single
+
+- id: face_recognition_button_test
+  alias: "🧪 [Khuôn mặt] Nút Test nhận diện khuôn mặt"
+  description: "Kiểm tra và cập nhật trạng thái nhận diện ngay trên Dashboard"
+  trigger:
+    - platform: state
+      entity_id: input_button.test_face_recognition
+  action:
+    - service: shell_command.test_face
+  mode: restart
+
+# ------------------------------------------------------------------------------
+# KỊCH BẢN 3: XỬ LÝ NÚT LƯU HỒ SƠ KHUÔN MẶT
+# ------------------------------------------------------------------------------
+- id: face_recognition_button_preview
+  alias: "📸 [Khuôn mặt] Nút Chụp ảnh xem trước hoặc Chụp lại"
+  description: "Chụp ảnh snapshot từ camera và hiển thị để xem trước"
+  trigger:
+    - platform: state
+      entity_id: input_button.capture_face_preview
+    - platform: state
+      entity_id: input_button.retake_face
+  action:
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.face_test_result
+      data:
+        value: "📸 Đang chụp ảnh... Vui lòng nhìn thẳng vào camera và giữ yên 1 giây"
+    - service: shell_command.preview_face
+    - delay: "00:00:01"
+    # Cập nhật đường dẫn kèm timestamp mới nhất để bắt buộc trình duyệt tải lại ảnh mới (không bị cache)
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.preview_image_url
+      data:
+        value: "/local/preview_face.jpg?t={{ as_timestamp(now()) }}"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.face_test_result
+      data:
+        value: "👀 Đã chụp ảnh xong lúc {{ now().strftime('%H:%M:%S') }}! Hãy xem ảnh bên dưới: Nếu rõ mặt bấm 'Đồng Ý Lưu', nếu chưa đẹp bấm 'Chụp Lại'."
+  mode: restart
+
+- id: face_recognition_button_confirm_save
+  alias: "✅ [Khuôn mặt] Nút Xác nhận lưu vào hồ sơ"
+  description: "Lưu ảnh vừa xem trước vào hồ sơ thành viên được chọn"
+  trigger:
+    - platform: state
+      entity_id: input_button.confirm_save_face
+  action:
+    - variables:
+        target_name: "{{ states('input_select.face_profile_train') }}"
+        display_name: >
+          {% if states('input_select.face_profile_train') == 'Me' %}
+            Mẹ
+          {% else %}
+            {{ states('input_select.face_profile_train') }}
+          {% endif %}
+    - service: shell_command.save_face
+      data:
+        name: "{{ target_name }}"
+    - delay: "00:00:01"
+    - service: input_text.set_value
+      target:
+        entity_id: input_text.face_test_result
+      data:
+        value: "🎉 Đã lưu thành công khuôn mặt cho {{ display_name }} lúc {{ now().strftime('%H:%M:%S') }}!"
+    - service: persistent_notification.create
+      data:
+        title: "✅ Đã lưu khuôn mặt thành công"
+        message: "Ảnh vừa chụp đã được nạp trực tiếp vào hồ sơ **{{ display_name }}**. Hệ thống AI đã học khuôn mặt này ngay lập tức!"
+        notification_id: "face_save_success"
+  mode: single
+
+
+- id: face_recognition_delete_photo_webhook
+  alias: "🗑️ [Khuôn mặt] Xóa ảnh hồ sơ qua Webhook"
+  description: "Nhận yêu cầu xóa ảnh từ giao diện thư viện"
+  trigger:
+    - platform: webhook
+      webhook_id: delete_face_photo
+      allowed_methods:
+        - POST
+      local_only: true
+  action:
+    - service: shell_command.delete_face
+      data:
+        person: "{{ trigger.json.person }}"
+        filename: "{{ trigger.json.filename }}"
+    - service: persistent_notification.create
+      data:
+        title: "🗑️ Đã xóa ảnh khuôn mặt"
+        message: "Đã xóa ảnh **{{ trigger.json.filename }}** khỏi hồ sơ **{{ trigger.json.person }}**."
+        notification_id: "face_delete_notify"
+  mode: single
+- id: lumentree_inverter_health_auto_start
+  alias: "☀️ [Lumentree Health] Khởi động giám sát Biến Tần khi bật Home Assistant"
+  description: "Tự động kích hoạt bộ giám sát biến tần mỗi khi Home Assistant khởi động"
+  trigger:
+    - platform: homeassistant
+      event: start
+  action:
+    - service: persistent_notification.create
+      data:
+        title: "🛡️ Bộ Giám Sát Lumentree Kích Hoạt"
+        message: "Hệ thống giám sát lỗi Biến Tần Lumentree đã khởi động thành công (06:00 - 17:00)."
+        notification_id: "lumentree_health_init"
+  mode: single
+
+- id: lumentree_inverter_health_check_fault
+  alias: "⚠️ [Lumentree Health] Phát hiện lỗi Biến Tần (PV = 0W từ 06h-17h)"
+  description: "Gửi thông báo tin nhắn khẩn cấp về điện thoại khi PV1 power <= 0W liên tục theo thời gian cài đặt"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.lumentree_pv1_power
+      below: 1
+      for:
+        minutes: 10
+  condition:
+    - condition: state
+      entity_id: input_boolean.solar_health_monitor_enabled
+      state: "on"
+    - condition: time
+      after: input_datetime.solar_health_start_time
+      before: input_datetime.solar_health_end_time
+    - condition: template
+      value_template: >
+        {% set pv = states('sensor.lumentree_pv1_power') | float(0) %}
+        {% set threshold = states('input_number.solar_health_power_threshold') | float(0) %}
+        {{ pv <= threshold }}
+  action:
+    - service: input_boolean.turn_on
+      target:
+        entity_id: input_boolean.solar_health_fault_status
+    - service: notify.notify
+      data:
+        title: "🚨 CẢNH BÁO LỖI BIẾN TẦN LUMENTREE"
+        message: >
+          ⚠️ Phát hiện Pin Mặt Trời = {{ states('sensor.lumentree_pv1_power') }}W!
+          - Thời gian bị 0W: Liên tục > {{ states('input_number.solar_health_check_interval') }} phút.
+          - Khung giờ quy định: {{ states('input_datetime.solar_health_start_time') }} - {{ states('input_datetime.solar_health_end_time') }}.
+          - Điện áp PV1: {{ states('sensor.lumentree_pv1_voltage') }} V, Dòng: {{ states('sensor.lumentree_pv1_current') }} A.
+          Vui lòng kiểm tra Biến Tần hoặc Aptomat ngay!
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+          priority: high
+    - service: persistent_notification.create
+      data:
+        title: "🚨 CẢNH BÁO LỖI BIẾN TẦN LUMENTREE"
+        message: "Biến tần bị lỗi không phát điện (PV1: {{ states('sensor.lumentree_pv1_power') }}W) trong khung giờ giám sát!"
+        notification_id: "lumentree_inverter_fault"
+  mode: single
+
+- id: lumentree_inverter_health_check_recovery
+  alias: "✅ [Lumentree Health] Khôi phục hoạt động Biến Tần (PV > 0W)"
+  description: "Thông báo về điện thoại khi biến tần bắt đầu phát điện trở lại"
+  trigger:
+    - platform: numeric_state
+      entity_id: sensor.lumentree_pv1_power
+      above: 5
+    - platform: time_pattern
+      minutes: "/1"
+  condition:
+    - condition: state
+      entity_id: input_boolean.solar_health_fault_status
+      state: "on"
+    - condition: numeric_state
+      entity_id: sensor.lumentree_pv1_power
+      above: 5
+  action:
+    - service: input_boolean.turn_off
+      target:
+        entity_id: input_boolean.solar_health_fault_status
+    - service: notify.notify
+      data:
+        title: "✅ THÔNG BÁO KHÔI PHỤC BIẾN TẦN"
+        message: "Biến tần Lumentree đã hoạt động bình thường trở lại! Công suất PV1 hiện tại: {{ states('sensor.lumentree_pv1_power') }} W."
+    - service: persistent_notification.dismiss
+      data:
+        notification_id: "lumentree_inverter_fault"
+  mode: single
+
+- id: lumentree_inverter_test_notification
+  alias: "🧪 [Lumentree Health] Nút Test thông báo khẩn cấp về điện thoại"
+  description: "Gửi tin nhắn thử nghiệm lập tức khi bấm nút Test trên Dashboard"
+  trigger:
+    - platform: state
+      entity_id: input_button.solar_health_test_notify
+  action:
+    - service: notify.notify
+      data:
+        title: "🧪 THỬ NGHIỆM THÔNG BÁO LỖI BIẾN TẦN (TEST)"
+        message: "Đây là tin nhắn thử nghiệm cảnh báo lỗi biến tần Lumentree. Công suất PV1 hiện tại: {{ states('sensor.lumentree_pv1_power') }}W lúc {{ now().strftime('%H:%M:%S') }}."
+        data:
+          push:
+            sound:
+              name: default
+              critical: 1
+              volume: 1.0
+          priority: high
+    - service: persistent_notification.create
+      data:
+        title: "🧪 Thử nghiệm thông báo thành công"
+        message: "Đã gửi thông báo test về điện thoại lúc {{ now().strftime('%H:%M:%S') }}."
+        notification_id: "lumentree_test_notify"
+  mode: single
+
+- id: lumentree_solar_ac_check_insufficient
+  alias: "⚠️ [Solar AC] Cảnh báo Công suất NLMT Quá thấp & Tắt Máy Lạnh"
+  description: "Kiểm tra 08h-16h liên tục N phút (mặc định 10p): PV1 < 290V và Lưới EVN > 300W -> Gửi thông báo & IR TẮT máy lạnh"
+  trigger:
+    - platform: time_pattern
+      minutes: "/1"
+    - platform: state
+      entity_id: sensor.lumentree_pv1_voltage
+    - platform: state
+      entity_id: sensor.lumentree_grid_power
+  condition:
+    - condition: state
+      entity_id: input_boolean.solar_ac_auto_control_enabled
+      state: "on"
+    - condition: time
+      after: input_datetime.solar_ac_auto_start_time
+      before: input_datetime.solar_ac_auto_end_time
+    - condition: template
+      value_template: >
+        {% set v1 = states('sensor.lumentree_pv1_voltage') | float(0) %}
+        {% set v_limit = states('input_number.solar_ac_pv_low_voltage') | float(290) %}
+        {{ v1 < v_limit }}
+    - condition: template
+      value_template: >
+        {% set grid = states('sensor.lumentree_grid_power') | float(0) %}
+        {% set g_limit = states('input_number.solar_ac_grid_high_power') | float(300) %}
+        {{ grid > g_limit }}
+    - condition: template
+      value_template: >
+        {% set duration_min = states('input_number.solar_ac_check_duration') | float(10) %}
+        {% set last_changed = states.sensor.lumentree_pv1_voltage.last_changed %}
+        {{ (now() - last_changed).total_seconds() >= (duration_min * 60) }}
+    - condition: template
+      value_template: "{{ states('input_select.solar_ac_auto_current_state') != 'THIẾU ĐIỆN SOLAR (TẮT MÁY LẠNH)' }}"
+  action:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.solar_ac_auto_current_state
+      data:
+        option: "THIẾU ĐIỆN SOLAR (TẮT MÁY LẠNH)"
+    - if:
+        - condition: state
+          entity_id: input_boolean.solar_ac_auto_notify_enabled
+          state: "on"
+      then:
+        - service: notify.notify
+          data:
+            title: "⚠️ CẢNH BÁO MÁY LẠNH: Công suất NLMT Quá thấp"
+            message: >
+              ⚠️ Công suất NLMT Quá thấp liên tục > {{ states('input_number.solar_ac_check_duration') }} phút!
+              - Điện áp PV1: {{ states('sensor.lumentree_pv1_voltage') }} V (Thấp hơn {{ states('input_number.solar_ac_pv_low_voltage') }}V)
+              - Công suất Lưới EVN: {{ states('sensor.lumentree_grid_power') }} W (Cao hơn {{ states('input_number.solar_ac_grid_high_power') }}W)
+              Đã kích hoạt lệnh TẮT máy lạnh qua nút bấm Hồng Ngoại!
+            data:
+              push:
+                sound:
+                  name: default
+                  critical: 1
+              priority: high
+    - service: script.lumentree_turn_off_ac_ir
+  mode: single
+
+- id: lumentree_solar_ac_check_sufficient
+  alias: "✅ [Solar AC] Thông báo Công suất NLMT đạt mức & Mở Máy Lạnh"
+  description: "Kiểm tra 08h-16h liên tục N phút (mặc định 10p): PV1 > 290V và Lưới EVN < 100W -> Gửi thông báo & IR MỞ máy lạnh"
+  trigger:
+    - platform: time_pattern
+      minutes: "/1"
+    - platform: state
+      entity_id: sensor.lumentree_pv1_voltage
+    - platform: state
+      entity_id: sensor.lumentree_grid_power
+  condition:
+    - condition: state
+      entity_id: input_boolean.solar_ac_auto_control_enabled
+      state: "on"
+    - condition: time
+      after: input_datetime.solar_ac_auto_start_time
+      before: input_datetime.solar_ac_auto_end_time
+    - condition: template
+      value_template: >
+        {% set v1 = states('sensor.lumentree_pv1_voltage') | float(0) %}
+        {% set v_limit = states('input_number.solar_ac_pv_high_voltage') | float(290) %}
+        {{ v1 > v_limit }}
+    - condition: template
+      value_template: >
+        {% set grid = states('sensor.lumentree_grid_power') | float(0) %}
+        {% set g_limit = states('input_number.solar_ac_grid_low_power') | float(100) %}
+        {{ grid < g_limit }}
+    - condition: template
+      value_template: >
+        {% set duration_min = states('input_number.solar_ac_check_duration') | float(10) %}
+        {% set last_changed = states.sensor.lumentree_pv1_voltage.last_changed %}
+        {{ (now() - last_changed).total_seconds() >= (duration_min * 60) }}
+    - condition: template
+      value_template: "{{ states('input_select.solar_ac_auto_current_state') != 'ĐỦ ĐIỆN SOLAR (MỞ MÁY LẠNH)' }}"
+  action:
+    - service: input_select.select_option
+      target:
+        entity_id: input_select.solar_ac_auto_current_state
+      data:
+        option: "ĐỦ ĐIỆN SOLAR (MỞ MÁY LẠNH)"
+    - if:
+        - condition: state
+          entity_id: input_boolean.solar_ac_auto_notify_enabled
+          state: "on"
+      then:
+        - service: notify.notify
+          data:
+            title: "✅ THÔNG BÁO MÁY LẠNH: Công suất NLMT đạt mức hoạt động"
+            message: >
+              ✅ Công suất NLMT đạt mức hoạt động liên tục > {{ states('input_number.solar_ac_check_duration') }} phút!
+              - Điện áp PV1: {{ states('sensor.lumentree_pv1_voltage') }} V (>= {{ states('input_number.solar_ac_pv_high_voltage') }}V)
+              - Công suất Lưới EVN: {{ states('sensor.lumentree_grid_power') }} W (<= {{ states('input_number.solar_ac_grid_low_power') }}W)
+              Đã kích hoạt lệnh MỞ máy lạnh qua nút bấm Hồng Ngoại!
+    - service: script.lumentree_turn_on_ac_ir
+  mode: single
+
+- id: start_solar_ac_daemon_on_ha_start
+  alias: "☀️ [Solar AC Daemon] Khởi động Daemon Giám sát khi bật Home Assistant"
+  description: "Đảm bảo Daemon đọc dữ liệu Lumentree luôn hoạt động 24/7"
+  trigger:
+    - platform: homeassistant
+      event: start
+    - platform: time_pattern
+      minutes: "/5"
+  action:
+    - service: shell_command.start_solar_daemon
+  mode: single

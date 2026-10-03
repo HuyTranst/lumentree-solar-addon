@@ -1,0 +1,24 @@
+name: "Lumentree Solar Guard"
+version: "1.0.0"
+slug: "lumentree_solar_guard"
+description: "Tự động giám sát biến tần Lumentree 24/7, phát hiện lỗi PV = 0W, điều khiển máy lạnh hồng ngoại và tích hợp cảm biến Real-Time vào Home Assistant."
+arch:
+  - amd64
+  - aarch64
+  - armv7
+  - i386
+startup: "service"
+boot: "auto"
+init: false
+map:
+  - config:rw
+options:
+  device_id: "H250521206"
+  ha_url: "http://supervisor/core"
+  mqtt_broker: "lesvr.suntcn.com"
+  mqtt_port: 8083
+schema:
+  device_id: str
+  ha_url: str
+  mqtt_broker: str
+  mqtt_port: int

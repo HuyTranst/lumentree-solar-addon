@@ -1,0 +1,544 @@
+# Loads default set of integrations. Do not remove.
+# Default integrations (excluding energy)
+api:
+cloud:
+config:
+counter:
+dhcp:
+history:
+homeassistant_hardware:
+logbook:
+media_source:
+mobile_app:
+my:
+person:
+ssdp:
+stream:
+sun:
+system_health:
+tag:
+tts:
+webhook:
+zeroconf:
+zone:
+
+
+# Load frontend themes from the themes folder
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+# ----------------------------------------------------
+# 1. HẸN GIỜ: 3 KHUNG GIỜ LINH HOẠT
+# ----------------------------------------------------
+input_datetime:
+  robot_schedule_1_time:
+    name: "Giờ Lịch Hẹn 1"
+    has_date: false
+    has_time: true
+    initial: "09:00:00"
+
+  robot_schedule_2_time:
+    name: "Giờ Lịch Hẹn 2"
+    has_date: false
+    has_time: true
+    initial: "13:00:00"
+
+  robot_schedule_3_time:
+    name: "Giờ Lịch Hẹn 3"
+    has_date: false
+    has_time: true
+    initial: "17:00:00"
+
+# ----------------------------------------------------
+# 2. CÔNG TẮC BẬT TẮT & CHỌN PHÒNG CHO TỪNG LỊCH HẸN
+# ----------------------------------------------------
+input_boolean:
+  # Lịch 1
+  robot_schedule_1_enabled:
+    name: "Bật Lịch Hẹn 1"
+    icon: "mdi:alarm-check"
+    initial: true
+  schedule_1_room_living:
+    name: "Lịch 1: Phòng Khách"
+    icon: "mdi:sofa"
+    initial: true
+  schedule_1_room_kitchen:
+    name: "Lịch 1: Nhà Bếp"
+    icon: "mdi:countertop"
+    initial: true
+  schedule_1_room_hallway:
+    name: "Lịch 1: Hành Lang"
+    icon: "mdi:transit-connection-variant"
+    initial: false
+  schedule_1_room_1:
+    name: "Lịch 1: Phòng 1"
+    icon: "mdi:bed"
+    initial: false
+  schedule_1_room_7:
+    name: "Lịch 1: Phòng 7"
+    icon: "mdi:door"
+    initial: false
+
+  # Lịch 2
+  robot_schedule_2_enabled:
+    name: "Bật Lịch Hẹn 2"
+    icon: "mdi:alarm-check"
+    initial: false
+  schedule_2_room_living:
+    name: "Lịch 2: Phòng Khách"
+    icon: "mdi:sofa"
+    initial: false
+  schedule_2_room_kitchen:
+    name: "Lịch 2: Nhà Bếp"
+    icon: "mdi:countertop"
+    initial: false
+  schedule_2_room_hallway:
+    name: "Lịch 2: Hành Lang"
+    icon: "mdi:transit-connection-variant"
+    initial: true
+  schedule_2_room_1:
+    name: "Lịch 2: Phòng 1"
+    icon: "mdi:bed"
+    initial: true
+  schedule_2_room_7:
+    name: "Lịch 2: Phòng 7"
+    icon: "mdi:door"
+    initial: false
+
+  # Lịch 3
+  robot_schedule_3_enabled:
+    name: "Bật Lịch Hẹn 3"
+    icon: "mdi:alarm-check"
+    initial: false
+  schedule_3_room_living:
+    name: "Lịch 3: Phòng Khách"
+    icon: "mdi:sofa"
+    initial: false
+  schedule_3_room_kitchen:
+    name: "Lịch 3: Nhà Bếp"
+    icon: "mdi:countertop"
+    initial: false
+  schedule_3_room_hallway:
+    name: "Lịch 3: Hành Lang"
+    icon: "mdi:transit-connection-variant"
+    initial: false
+  schedule_3_room_1:
+    name: "Lịch 3: Phòng 1"
+    icon: "mdi:bed"
+    initial: false
+  schedule_3_room_7:
+    name: "Lịch 3: Phòng 7"
+    icon: "mdi:door"
+    initial: true
+
+  # CÔNG TẮC CHỌN NHIỀU PHÒNG DỌN DẸP NGAY TRÊN DASHBOARD
+  manual_room_living:
+    name: "Chọn: Phòng Khách"
+    icon: "mdi:sofa"
+    initial: true
+  manual_room_kitchen:
+    name: "Chọn: Nhà Bếp"
+    icon: "mdi:countertop"
+    initial: true
+  manual_room_hallway:
+    name: "Chọn: Hành Lang"
+    icon: "mdi:transit-connection-variant"
+    initial: false
+  manual_room_1:
+    name: "Chọn: Phòng 1"
+    icon: "mdi:bed"
+    initial: false
+  manual_room_7:
+    name: "Chọn: Phòng 7"
+    icon: "mdi:door"
+    initial: false
+
+# ----------------------------------------------------
+# 3. LỆNH REST ĐIỀU KHIỂN ROBOT VALETUDO
+# ----------------------------------------------------
+rest_command:
+  valetudo_basic_control:
+    url: "http://192.168.1.173/api/v2/robot/capabilities/BasicControlCapability"
+    method: "PUT"
+    content_type: "application/json"
+    payload: '{"action": "{{ action }}"}'
+
+  valetudo_locate:
+    url: "http://192.168.1.173/api/v2/robot/capabilities/LocateCapability"
+    method: "PUT"
+    content_type: "application/json"
+    payload: '{"action": "locate"}'
+
+  valetudo_clean_segment:
+    url: "http://192.168.1.173/api/v2/robot/capabilities/MapSegmentationCapability"
+    method: "PUT"
+    content_type: "application/json"
+    payload: '{"action": "start_segment_action", "segment_ids": {{ segment_ids }}, "iterations": {{ iterations | default(1) }}}'
+
+  valetudo_empty_dock:
+    url: "http://192.168.1.173/api/v2/robot/capabilities/AutoEmptyDockManualTriggerCapability"
+    method: "PUT"
+    content_type: "application/json"
+    payload: '{"action": "trigger"}'
+
+  valetudo_clean_mop:
+    url: "http://192.168.1.173/api/v2/robot/capabilities/MopDockCleanManualTriggerCapability"
+    method: "PUT"
+    content_type: "application/json"
+    payload: '{"action": "start"}'
+
+  valetudo_dry_mop:
+    url: "http://192.168.1.173/api/v2/robot/capabilities/MopDockDryManualTriggerCapability"
+    method: "PUT"
+    content_type: "application/json"
+    payload: '{"action": "start"}'
+
+# ----------------------------------------------------
+# 4. TEMPLATE SENSOR & TEMPLATE VACUUM CHUẨN MODERN HA
+# ----------------------------------------------------
+template:
+
+  - select:
+      - name: "Robot Mova Chế Độ Làm Việc"
+        unique_id: robot_mova_che_do_lam_viec
+        icon: mdi:cog-sync
+        state: >
+          {% set m = states('select.valetudo_l40_ultra_oilyinstructivebeaver_mode') %}
+          {% if m == 'vacuum_and_mop' %} Hút bụi & Lau nhà
+          {% elif m == 'vacuum' %} Chỉ hút bụi
+          {% elif m == 'mop' %} Chỉ lau nhà
+          {% elif m == 'vacuum_then_mop' %} Hút trước, Lau sau
+          {% else %} Hút bụi & Lau nhà {% endif %}
+        options: "{{ ['Hút bụi & Lau nhà', 'Chỉ hút bụi', 'Chỉ lau nhà', 'Hút trước, Lau sau'] }}"
+        select_option:
+          action: select.select_option
+          target:
+            entity_id: select.valetudo_l40_ultra_oilyinstructivebeaver_mode
+          data:
+            option: >
+              {% if option == 'Hút bụi & Lau nhà' %} vacuum_and_mop
+              {% elif option == 'Chỉ hút bụi' %} vacuum
+              {% elif option == 'Chỉ lau nhà' %} mop
+              {% elif option == 'Hút trước, Lau sau' %} vacuum_then_mop
+              {% else %} vacuum_and_mop {% endif %}
+
+      - name: "Robot Mova Lực Hút Bụi"
+        unique_id: robot_mova_luc_hut_bui
+        icon: mdi:fan
+        state: >
+          {% set f = states('select.valetudo_l40_ultra_oilyinstructivebeaver_fan') %}
+          {% if f == 'low' %} Yên tĩnh (Nhẹ)
+          {% elif f == 'medium' %} Tiêu chuẩn (Vừa)
+          {% elif f == 'high' %} Mạnh
+          {% elif f == 'max' %} Siêu mạnh (Tối đa)
+          {% else %} Tiêu chuẩn (Vừa) {% endif %}
+        options: "{{ ['Yên tĩnh (Nhẹ)', 'Tiêu chuẩn (Vừa)', 'Mạnh', 'Siêu mạnh (Tối đa)'] }}"
+        select_option:
+          action: select.select_option
+          target:
+            entity_id: select.valetudo_l40_ultra_oilyinstructivebeaver_fan
+          data:
+            option: >
+              {% if option == 'Yên tĩnh (Nhẹ)' %} low
+              {% elif option == 'Tiêu chuẩn (Vừa)' %} medium
+              {% elif option == 'Mạnh' %} high
+              {% elif option == 'Siêu mạnh (Tối đa)' %} max
+              {% else %} medium {% endif %}
+
+      - name: "Robot Mova Lượng Nước Lau"
+        unique_id: robot_mova_luong_nuoc_lau
+        icon: mdi:water-percent
+        state: >
+          {% set w = states('select.valetudo_l40_ultra_oilyinstructivebeaver_water') %}
+          {% if w == 'min' %} Rất ít (Khô ráo)
+          {% elif w == 'low' %} Ít (Lau nhẹ)
+          {% elif w == 'medium' %} Vừa (Tiêu chuẩn)
+          {% elif w == 'high' %} Nhiều (Ướt đẫm)
+          {% elif w == 'max' %} Tối đa (Làm sạch sâu)
+          {% else %} Vừa (Tiêu chuẩn) {% endif %}
+        options: "{{ ['Rất ít (Khô ráo)', 'Ít (Lau nhẹ)', 'Vừa (Tiêu chuẩn)', 'Nhiều (Ướt đẫm)', 'Tối đa (Làm sạch sâu)'] }}"
+        select_option:
+          action: select.select_option
+          target:
+            entity_id: select.valetudo_l40_ultra_oilyinstructivebeaver_water
+          data:
+            option: >
+              {% if option == 'Rất ít (Khô ráo)' %} min
+              {% elif option == 'Ít (Lau nhẹ)' %} low
+              {% elif option == 'Vừa (Tiêu chuẩn)' %} medium
+              {% elif option == 'Nhiều (Ướt đẫm)' %} high
+              {% elif option == 'Tối đa (Làm sạch sâu)' %} max
+              {% else %} medium {% endif %}
+  - sensor:
+      - name: "Trạng Thái Biến Tần Lumentree"
+        unique_id: lumentree_inverter_status
+        icon: >
+          {% if is_state('input_boolean.solar_health_fault_status', 'on') %}
+            mdi:lightning-bolt-alert
+          {% elif is_state('input_boolean.solar_health_monitor_enabled', 'off') %}
+            mdi:shield-off
+          {% else %}
+            mdi:solar-power-variant
+          {% endif %}
+        state: >
+          {% set start = states('input_datetime.solar_health_start_time') %}
+          {% set end = states('input_datetime.solar_health_end_time') %}
+          {% set now_time = now().strftime('%H:%M:%S') %}
+          
+          {% if is_state('input_boolean.solar_health_monitor_enabled', 'off') %}
+            Đã Tắt Giám Sát
+          {% elif is_state('input_boolean.solar_health_fault_status', 'on') %}
+            ⚠️ LỖI: PIN MẶT TRỜI 0W
+          {% elif now_time >= start and now_time <= end %}
+            🟢 Đang Giám Sát (Bình Thường)
+          {% else %}
+            🌙 Ngoài Khung Giờ Giám Sát
+          {% endif %}
+
+      - name: "Trạng Thái Máy Lạnh Solar"
+        unique_id: trang_thai_may_lanh_solar
+        icon: mdi:snowflake
+        state: >
+          {% set st = states('input_select.solar_ac_auto_current_state') %}
+          {% if is_state('input_boolean.solar_ac_auto_control_enabled', 'off') %}
+            Đã Tắt Tự Động Máy Lạnh
+          {% elif st == 'THIẾU ĐIỆN SOLAR (TẮT MÁY LẠNH)' %}
+            ⚠️ Thiếu Điện Solar (Đã Tắt Máy Lạnh)
+          {% elif st == 'ĐỦ ĐIỆN SOLAR (MỞ MÁY LẠNH)' %}
+            ✅ Đủ Điện Solar (Đã Mở Máy Lạnh)
+          {% else %}
+            🟢 Đang Giám Sát (Bình Thường)
+          {% endif %}
+
+      - name: "Robot Mova Trạng Thái Tiếng Việt"
+        unique_id: robot_mova_trang_thai_tieng_viet
+        icon: mdi:robot-vacuum
+        state: >
+          {% set st = states('sensor.valetudo_l40_ultra_oilyinstructivebeaver_dock_status') %}
+          {% set err = states('sensor.valetudo_l40_ultra_oilyinstructivebeaver_error') %}
+          {% if err != 'none' and err != 'ok' and err != 'unavailable' and err != 'unknown' %}
+            ⚠️ Cảnh báo lỗi: {{ err }}
+          {% elif st == 'docked' or st == 'charging' or st == 'idle' %}
+            🏠 Đang ở Trạm Sạc Dock (Sẵn Sàng)
+          {% elif st == 'drying' %}
+            💨 Đang sấy khô giẻ lau
+          {% elif st == 'washing' %}
+            🧼 Đang tự động giặt giẻ lau
+          {% elif st == 'emptying' %}
+            🗑️ Đang hút rác lên Dock
+          {% elif st == 'cleaning' %}
+            🟢 Đang hút bụi & lau nhà
+          {% elif st == 'returning' %}
+            🏃 Đang quay về Dock sạc
+          {% elif st == 'paused' %}
+            ⏸️ Đang tạm dừng
+          {% else %}
+            🟢 Sẵn sàng làm việc
+          {% endif %}
+
+  - vacuum:
+      - name: "Valetudo L40 Ultra (OilyInstructiveBeaver)"
+        unique_id: valetudo_l40_ultra_oilyinstructivebeaver
+        state: >
+          {% set st = states('sensor.valetudo_l40_ultra_oilyinstructivebeaver_dock_status') %}
+          {% if st == 'docked' or st == 'charging' or st == 'idle' %}
+            docked
+          {% elif st == 'cleaning' %}
+            cleaning
+          {% elif st == 'paused' %}
+            paused
+          {% elif st == 'returning' %}
+            returning
+          {% else %}
+            docked
+          {% endif %}
+        battery_level: "{{ states('sensor.valetudo_l40_ultra_oilyinstructivebeaver_battery_level') | int(0) }}"
+        start:
+          action: rest_command.valetudo_basic_control
+          data:
+            action: "start"
+        pause:
+          action: rest_command.valetudo_basic_control
+          data:
+            action: "pause"
+        stop:
+          action: rest_command.valetudo_basic_control
+          data:
+            action: "stop"
+        return_to_base:
+          action: rest_command.valetudo_basic_control
+          data:
+            action: "home"
+        locate:
+          action: rest_command.valetudo_locate
+
+# ----------------------------------------------------
+# 5. CẢM BIẾN NHẬN DIỆN KHUÔN MẶT (FRIGATE & MQTT)
+# ----------------------------------------------------
+mqtt:
+  camera:
+    - name: "Camera Dahua Truoc Cua"
+      unique_id: camera_dahua_truoc_cua
+      topic: "frigate/dahua_cam"
+  sensor:
+    - name: "Face Recognition Person"
+      unique_id: face_recognition_person
+      state_topic: "homeassistant/face/match"
+      icon: mdi:account-check
+
+    - name: "Face Recognition Last Time"
+      unique_id: face_recognition_last_time
+      state_topic: "homeassistant/face/match_time"
+      icon: mdi:clock-check-outline
+
+# ----------------------------------------------------
+# 6. INPUT HELPERS (NÚT BẤM VÀ DANH SÁCH CHỌN HỒ SƠ)
+# ----------------------------------------------------
+input_select:
+  face_profile_train:
+    name: "Chọn hồ sơ khuôn mặt"
+    options:
+      - "Huy"
+      - "Dien"
+      - "Me"
+      - "Khang"
+    icon: mdi:account-group
+
+input_button:
+  test_face_recognition:
+    name: "Test nhận diện khuôn mặt"
+    icon: mdi:face-recognition
+
+  capture_face_preview:
+    name: "1. Bấm Chụp Ảnh (Xem trước)"
+    icon: mdi:camera
+
+  confirm_save_face:
+    name: "2. ✅ Đồng Ý Lưu Vào Hồ Sơ"
+    icon: mdi:check-circle
+
+  retake_face:
+    name: "🔄 Chụp Lại"
+    icon: mdi:camera-retake
+
+input_text:
+  face_test_result:
+    name: "Kết quả kiểm tra"
+    initial: "Sẵn sàng"
+    max: 255
+  preview_image_url:
+    name: "URL Ảnh Xem Trước"
+    initial: "/local/preview_face.jpg"
+    max: 255
+
+
+shell_command:
+  start_solar_daemon: "sh /config/start_daemon.sh"
+  preview_face: "/bin/sh /config/preview_face.sh"
+  save_face: "/bin/sh /config/save_face.sh '{{ name }}'"
+  test_face: "/bin/sh /config/test_face.sh"
+  delete_face: "/bin/sh /config/delete_face.sh '{{ person }}' '{{ filename }}'"
+
+
+# ==============================================================================
+# HỆ THỐNG BIẾN TOÀN BỘ GIÁM SÁT LUMENTREE & MÁY LẠNH (LƯU LOCAL TỰ ĐỘNG)
+# ==============================================================================
+
+input_datetime:
+  solar_health_start_time:
+    name: "Giờ bắt đầu kiểm tra"
+    has_date: false
+    has_time: true
+  solar_health_end_time:
+    name: "Giờ kết thúc kiểm tra"
+    has_date: false
+    has_time: true
+  solar_ac_auto_start_time:
+    name: "Giờ bắt đầu kiểm tra máy lạnh"
+    has_date: false
+    has_time: true
+  solar_ac_auto_end_time:
+    name: "Giờ kết thúc kiểm tra máy lạnh"
+    has_date: false
+    has_time: true
+
+input_number:
+  solar_health_check_interval:
+    name: "Thời gian chờ báo lỗi (Phút)"
+    min: 1
+    max: 60
+    step: 1
+    unit_of_measurement: "phút"
+    icon: mdi:timer-cog
+  solar_health_power_threshold:
+    name: "Ngưỡng công suất lỗi (W)"
+    min: 0
+    max: 100
+    step: 1
+    unit_of_measurement: "W"
+    icon: mdi:flash-alert
+  solar_ac_check_duration:
+    name: "Thời gian chờ báo lỗi máy lạnh (Phút)"
+    min: 1
+    max: 60
+    step: 1
+    unit_of_measurement: "phút"
+    icon: mdi:timer-cog
+  solar_ac_pv_low_voltage:
+    name: "Ngưỡng áp PV1 thấp (V)"
+    min: 100
+    max: 500
+    step: 1
+    unit_of_measurement: "V"
+    icon: mdi:current-ac
+  solar_ac_grid_high_power:
+    name: "Ngưỡng Lưới EVN cao (W)"
+    min: 0
+    max: 5000
+    step: 10
+    unit_of_measurement: "W"
+    icon: mdi:transmission-tower-import
+  solar_ac_pv_high_voltage:
+    name: "Ngưỡng áp PV1 đạt (V)"
+    min: 100
+    max: 500
+    step: 1
+    unit_of_measurement: "V"
+    icon: mdi:current-ac
+  solar_ac_grid_low_power:
+    name: "Ngưỡng Lưới EVN đạt (W)"
+    min: 0
+    max: 5000
+    step: 10
+    unit_of_measurement: "W"
+    icon: mdi:transmission-tower-export
+
+input_boolean:
+  solar_health_monitor_enabled:
+    name: "Bật/Tắt Giám sát lỗi Biến Tần"
+    icon: mdi:shield-check
+  solar_health_fault_status:
+    name: "Cờ trạng thái lỗi Biến Tần"
+    icon: mdi:alert-circle
+  solar_ac_auto_notify_enabled:
+    name: "Bật/Tắt Thông báo máy lạnh"
+    icon: mdi:bell-ring
+  solar_ac_auto_control_enabled:
+    name: "Bật/Tắt Tự động điều khiển hồng ngoại"
+    icon: mdi:remote
+
+input_button:
+  solar_health_test_notify:
+    name: "Nút thử nghiệm gửi thông báo về điện thoại"
+    icon: mdi:bell-ring-outline
+
+input_select:
+  solar_ac_auto_current_state:
+    name: "Trạng thái tự động máy lạnh hiện tại"
+    icon: mdi:air-conditioner
+    options:
+      - "CHƯA XÁC ĐỊNH"
+      - "THIẾU ĐIỆN SOLAR (TẮT MÁY LẠNH)"
+      - "ĐỦ ĐIỆN SOLAR (MỞ MÁY LẠNH)"
