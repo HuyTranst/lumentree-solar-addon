@@ -22,8 +22,13 @@ STATUS_PATH = os.path.join(BASE_DIR, "www/solar_ac/status.json")
 LOG_PATH = os.path.join(BASE_DIR, "www/solar_ac/daemon.log")
 
 # Home Assistant Token & API
-HA_URL = "http://homeassistant:8123"
-HA_TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiYzZmZGNiN2NjNDc0ODAwYjIyOTIzYjc4YjIyNWVhZiIsImlhdCI6MTc4ODI0MDMwNSwiZXhwIjoyMTAzNjAwMzA1fQ.sKrjqR-9F7cQpEhBF7ugLxsL6HjVIGTOwBdw_8T9WQs"
+SUPERVISOR_TOKEN = os.environ.get("SUPERVISOR_TOKEN", "")
+if SUPERVISOR_TOKEN:
+    HA_URL = "http://supervisor/core"
+    HA_TOKEN = SUPERVISOR_TOKEN
+else:
+    HA_URL = os.environ.get("HA_URL", "http://homeassistant:8123")
+    HA_TOKEN = os.environ.get("HA_TOKEN", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJiYzZmZGNiN2NjNDc0ODAwYjIyOTIzYjc4YjIyNWVhZiIsImlhdCI6MTc4ODI0MDMwNSwiZXhwIjoyMTAzNjAwMzA1fQ.sKrjqR-9F7cQpEhBF7ugLxsL6HjVIGTOwBdw_8T9WQs")
 
 HA_HEADERS = {
     "Authorization": f"Bearer {HA_TOKEN}",
